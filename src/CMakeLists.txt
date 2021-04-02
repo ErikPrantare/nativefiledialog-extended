@@ -8,7 +8,14 @@ if(nfd_PLATFORM STREQUAL PLATFORM_WIN32)
   list(APPEND SOURCE_FILES nfd_win.cpp)
 endif()
 
-if(nfd_PLATFORM STREQUAL PLATFORM_LINUX)
+if(nfd_PLATFORM STREQUAL PLATFORM_LINUX_GTK3)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+  message("Using GTK version: ${GTK3_VERSION}")
+  list(APPEND SOURCE_FILES nfd_gtk.cpp)
+endif()
+
+if(nfd_PLATFORM STREQUAL PLATFORM_LINUX_GTK4)
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
   message("Using GTK version: ${GTK3_VERSION}")
@@ -28,7 +35,7 @@ add_library(${TARGET_NAME} STATIC
 target_include_directories(${TARGET_NAME}
   PUBLIC include/)
 
-if(nfd_PLATFORM STREQUAL PLATFORM_LINUX)
+if(nfd_PLATFORM STREQUAL PLATFORM_LINUX_GTK3)
   target_include_directories(${TARGET_NAME}
     PRIVATE ${GTK3_INCLUDE_DIRS})
   target_link_libraries(${TARGET_NAME}
