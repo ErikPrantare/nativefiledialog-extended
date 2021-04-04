@@ -92,22 +92,23 @@ struct ButtonClickedArgs {
 void
 AddFiltersToDialog(
         GtkFileChooser* chooser,
-        const nfdnfilteritem_t* filterList,
+        const nfdnfilteritem_t* filters,
         nfdfiltersize_t filterCount)
 {
     if(filterCount) {
-        assert(filterList);
+        assert(filters);
 
         // we have filters to add ... format and add them
 
         for(nfdfiltersize_t index = 0; index != filterCount; ++index) {
+            const nfdnfilteritem_t& currentFilter = filters[index];
+
             GtkFileFilter* filter = gtk_file_filter_new();
 
             // count number of file extensions
             size_t sep = 1;
-            for(const nfdnchar_t* p_spec = filterList[index].spec; *p_spec;
-                ++p_spec) {
-                if(*p_spec == L',') {
+            for(const nfdnchar_t* ch = currentFilter.spec; *ch; ++ch) {
+                if(*ch == L',') {
                     ++sep;
                 }
             }
@@ -115,24 +116,21 @@ AddFiltersToDialog(
             // friendly name conversions: "png,jpg" -> "Image files (png, jpg)"
 
             // calculate space needed (including the trailing '\0')
-            size_t nameSize = sep + strlen(filterList[index].spec) + 3
-                              + strlen(filterList[index].name);
+            size_t nameSize = sep + strlen(currentFilter.spec) + 3
+                              + strlen(currentFilter.name);
 
             // malloc the required memory
             nfdnchar_t* nameBuf =
                     NFDi_Malloc<nfdnchar_t>(sizeof(nfdnchar_t) * nameSize);
 
             nfdnchar_t* p_nameBuf = nameBuf;
-            for(const nfdnchar_t* p_filterName = filterList[index].name;
-                *p_filterName;
-                ++p_filterName) {
-                *p_nameBuf++ = *p_filterName;
+            for(const nfdnchar_t* name = currentFilter.name; *name; ++name) {
+                *p_nameBuf++ = *name;
             }
             *p_nameBuf++                       = ' ';
             *p_nameBuf++                       = '(';
-            const nfdnchar_t* p_extensionStart = filterList[index].spec;
-            for(const nfdnchar_t* p_spec = filterList[index].spec; true;
-                ++p_spec) {
+            const nfdnchar_t* p_extensionStart = currentFilter.spec;
+            for(const nfdnchar_t* p_spec = currentFilter.spec;; ++p_spec) {
                 if(*p_spec == ',' || !*p_spec) {
                     if(*p_spec == ',') {
                         *p_nameBuf++ = ',';
@@ -245,8 +243,7 @@ AddFiltersToDialogWithMap(
             *p_nameBuf++                       = ' ';
             *p_nameBuf++                       = '(';
             const nfdnchar_t* p_extensionStart = filterList[index].spec;
-            for(const nfdnchar_t* p_spec = filterList[index].spec; true;
-                ++p_spec) {
+            for(const nfdnchar_t* p_spec = filterList[index].spec;; ++p_spec) {
                 if(*p_spec == ',' || !*p_spec) {
                     if(*p_spec == ',') {
                         *p_nameBuf++ = ',';
